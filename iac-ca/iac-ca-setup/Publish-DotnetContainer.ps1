@@ -8,5 +8,5 @@ param(
 
 dotnet publish $Project --os linux /t:PublishContainer -p:ContainerImageTag=latest -p:ContainerImageName=$ContainerImageName
 Write-Host "docker login $Registry -u $RegistryUsername -p $RegistryPassword"
-docker login $Registry -u $RegistryUsername -p $RegistryPassword
+docker login $Registry -u $RegistryUsername -p $RegistryPassword 2>$null
 docker push $ContainerImageName

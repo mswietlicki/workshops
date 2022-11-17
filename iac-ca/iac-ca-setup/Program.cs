@@ -7,6 +7,80 @@ using ContainerRegistry = Pulumi.AzureNative.ContainerRegistry;
 using OperationalInsights = Pulumi.AzureNative.OperationalInsights;
 using Local = Pulumi.Command.Local;
 
+
+static App.ContainerApp SetupApp(
+    string appName,
+    string pubApiPath,
+    Output<string> containerImageName,
+    Output<string> environmentId,
+    Output<string> registry,
+    Output<string> registryUsername,
+    Output<string> registryPassword)
+{
+    var dotnetPublish = new Local.Command($"{appName}-publish-image", new Local.CommandArgs
+    {
+        Create = Output.Format($"./Publish-DotnetContainer.ps1 -Project {pubApiPath} -ContainerImageName {containerImageName} -Registry {registry} -RegistryUsername {registryUsername} -RegistryPassword {registryPassword}"),
+        Interpreter = new[] { "pwsh", "-nol", "-nop", "-c" }
+    });
+
+    var app = new App.ContainerApp(appName, new App.ContainerAppArgs
+    {
+        Configuration = new App.Inputs.ConfigurationArgs
+        {
+            Dapr = new App.Inputs.DaprArgs
+            {
+                AppPort = 80,
+                AppProtocol = "http",
+                Enabled = true,
+                AppId = appName
+            },
+            Ingress = new App.Inputs.IngressArgs
+            {
+                External = true,
+                TargetPort = 80,
+                AllowInsecure = true
+            },
+            Registries =
+            {
+                new App.Inputs.RegistryCredentialsArgs
+                {
+                    Server = registry,
+                    Username = registryUsername,
+                    PasswordSecretRef = "registry-pwd"
+                }
+            },
+            Secrets = new InputList<App.Inputs.SecretArgs>
+            {
+                new App.Inputs.SecretArgs {
+                    Name = "registry-pwd",
+                    Value = registryPassword
+                }
+            }
+        },
+        ContainerAppName = appName,
+        ManagedEnvironmentId = environmentId,
+        ResourceGroupName = "workshop-ca-rg",
+        Template = new App.Inputs.TemplateArgs
+        {
+            Containers =
+            {
+                new App.Inputs.ContainerArgs
+                {
+                    Image = containerImageName,
+                    Name = appName,
+                    Env = {}
+                },
+            }
+        },
+    }, new CustomResourceOptions
+    {
+        DependsOn = dotnetPublish
+    });
+
+    return app;
+}
+
+
 return await Pulumi.Deployment.RunAsync(() =>
 {
     var resourceGroup = new ResourceGroup("resourceGroup", new ResourceGroupArgs
@@ -62,72 +136,18 @@ return await Pulumi.Deployment.RunAsync(() =>
         },
     });
 
+    var apiInt = SetupApp("iac-ca-api-int", "../src/iac-ca-api-int/", Output.Format($"{registry.LoginServer}/iac-ca-api-int"),
+        environment.Id,
+        registry.LoginServer,
+        registryCredentials.Apply(creds => creds.Username).Apply(Output.Create),
+        registryCredentials.Apply(creds => creds.Password).Apply(Output.Create));
 
-    var appName = "iac-ca-api-pub";
-    var pubApiPath = "../src/iac-ca-api-pub/";
-    var containerImageName = Output.Format($"{registry.LoginServer}/iac-ca-api-pub");
-    var registryUsername = registryCredentials.Apply(creds => creds.Username).Apply(Output.Create);
-    var registryPassword = registryCredentials.Apply(creds => creds.Password).Apply(Output.Create);
+    var apiPub = SetupApp("iac-ca-api-pub", "../src/iac-ca-api-pub/", Output.Format($"{registry.LoginServer}/iac-ca-api-pub"),
+        environment.Id,
+        registry.LoginServer,
+        registryCredentials.Apply(creds => creds.Username).Apply(Output.Create),
+        registryCredentials.Apply(creds => creds.Password).Apply(Output.Create));
 
-    var dotnetPublish = new Local.Command("publish-api-image", new Local.CommandArgs
-    {
-        Create = Output.Format($"./Publish-DotnetContainer.ps1 -Project {pubApiPath} -ContainerImageName {containerImageName} -Registry {registry.LoginServer} -RegistryUsername {registryUsername} -RegistryPassword {registryPassword}"),
-        Interpreter = new[] { "pwsh", "-nol", "-nop", "-c" }
-    });
-
-    var app = new App.ContainerApp(appName, new App.ContainerAppArgs
-    {
-        Configuration = new App.Inputs.ConfigurationArgs
-        {
-            Dapr = new App.Inputs.DaprArgs
-            {
-                AppPort = 80,
-                AppProtocol = "http",
-                Enabled = true,
-                AppId = appName
-            },
-            Ingress = new App.Inputs.IngressArgs
-            {
-                External = true,
-                TargetPort = 80,
-                AllowInsecure = true
-            },
-            Registries =
-            {
-                new App.Inputs.RegistryCredentialsArgs
-                {
-                    Server = registry.LoginServer,
-                    Username = registryUsername,
-                    PasswordSecretRef = "registry-pwd"
-                }
-            },
-            Secrets = new InputList<App.Inputs.SecretArgs>
-            {
-                new App.Inputs.SecretArgs {
-                    Name = "registry-pwd",
-                    Value = registryPassword
-                }
-            }
-        },
-        ContainerAppName = appName,
-        ManagedEnvironmentId = environment.Id,
-        ResourceGroupName = resourceGroup.Name,
-        Template = new App.Inputs.TemplateArgs
-        {
-            Containers =
-            {
-                new App.Inputs.ContainerArgs
-                {
-                    Image = containerImageName,
-                    Name = appName,
-                    Env = {}
-                },
-            }
-        },
-    }, new CustomResourceOptions
-    {
-        DependsOn = dotnetPublish
-    });
 
     // Export the primary key of the Storage Account
     return new Dictionary<string, object?>
@@ -137,6 +157,8 @@ return await Pulumi.Deployment.RunAsync(() =>
         ["RegistryUsername"] = registryCredentials.Apply(creds => creds.Username).Apply(Output.Create),
         ["RegistryPassword"] = registryCredentials.Apply(creds => creds.Password).Apply(Output.CreateSecret),
         ["EnvironmentName"] = environment.Name,
-        ["ApiPub"] = app.LatestRevisionFqdn
+        ["ApiInt"] = apiInt.LatestRevisionFqdn,
+        ["ApiPub"] = apiPub.LatestRevisionFqdn
     };
 });
+
