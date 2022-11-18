@@ -1,4 +1,4 @@
-IaC: Container Apps with some Pulumi
+IaC: Container Apps with some Pulumi (by Mateusz Świetlicki)
 ======================================
 
 Azure Container Apps https://azure.microsoft.com/en-us/products/container-apps is a "new" Microsoft solution for "simple" K8s.
