@@ -1,0 +1,44 @@
+{
+  "version": "0.0.1.23",
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "preserveCompilationContext": true
+  },
+  "dependencies": {
+    "SoftwareOne.ResourceManager.Azure": "1.*",
+    "SoftwareOne.ResourceManager.Common": "1.*",
+    "SoftwareOne.ResourceManager.ServiceBus": "1.*",
+    "SoftwareOne.ResourceManager.Azure.ResourceSynchronizer": "1.*",
+    "SimpleInjector": "3.3.1",
+    "SimpleInjector.Packaging": "3.3.1",
+    "Microsoft.ApplicationInsights": "2.2.0",
+    "Microsoft.Extensions.Configuration": "1.1.0",
+    "Microsoft.Extensions.Configuration.Binder": "1.1.0",
+    "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.0",
+    "Microsoft.Extensions.Configuration.FileExtensions": "1.1.0",
+    "Microsoft.Extensions.Configuration.Json": "1.1.0",
+    "MongoDB.Driver": "2.4.0",
+    "Serilog.Extensions.Logging": "1.2.0",
+    "Serilog.Sinks.Literate": "2.0.0",
+    "Serilog.Sinks.ApplicationInsights": "2.1.0",
+    "Serilog.Sinks.Seq": "3.0.1",
+    "Serilog.Settings.Configuration": "2.1.0",
+    "Serilog": "2.3.0",
+    "Serilog.Enrichers.Thread": "2.0.0",
+    "Pyra.Foundation.Infrastructure": "2.*",
+    "Pyra.Foundation.KeyVaultProvider": "2.*",
+    "Pyra.Foundation.Service2Service.Client": "2.*",
+    "Pyra.Common.WebJobs.Concurrency": "0.0.1.3"
+  },
+  "frameworks": {
+    "net461": {
+      
+    }
+  },
+  "publishOptions": {
+    "include": [
+      "appsettings*.json",
+      "settings.job"
+    ]
+  }
+}

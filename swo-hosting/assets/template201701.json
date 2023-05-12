@@ -1,0 +1,52 @@
+{
+            "comments": "",
+            "type": "Microsoft.Web/sites",
+            "name": "[parameters('webApi')]",
+            "apiVersion": "2015-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {
+                "name": "[parameters('webApi')]",
+                "hostNames": [
+                    "[concat(parameters('webApi'),'.azurewebsites.net')]"
+                ],
+                "enabledHostNames": [
+                    "[concat(parameters('webApi'),'.azurewebsites.net')]",
+                    "[concat(parameters('webApi'),'.scm.azurewebsites.net')]"
+                ],
+                "serverFarmId": "[resourceId(parameters('servicePlanGroup'),'Microsoft.Web/serverfarms',parameters('servicePlan'))]",
+                "siteConfig": {
+                    "phpVersion": "off",
+                    "alwaysOn": "true",
+                    "webSocketsEnabled": "true",
+                    "appSettings": [{
+                            "name": "ASPNETCORE_ENVIRONMENT",
+                            "value": "[parameters('ASPNETCORE_ENVIRONMENT')]"
+                        },
+                        {
+                            "name": "SERVICEBUS_SUBSCRIPTION_NAME",
+                            "value": "[parameters('SERVICEBUS_SUBSCRIPTION_NAME')]"
+                        },
+                        {
+                            "name": "MONGODB_CONNECTION_STRING",
+                            "value": "[parameters('MONGODB_CONNECTION_STRING')]"
+                        },
+                        {
+                            "name": "MONGODB_DATABASE_NAME",
+                            "value": "[parameters('MONGODB_DATABASE_NAME')]"
+                        },
+                        {
+                            "name": "PYRA_SERVICEURL_USERINFO",
+                            "value": "[parameters('PYRA_SERVICEURL_USERINFO')]"
+                        },
+                        {
+                            "name": "PYRA_S2SAPIKEY_USERINFO",
+                            "value": "[parameters('PYRA_S2SAPIKEY_USERINFO')]"
+                        }
+                    ],
+                    "connectionStrings": [{
+                        "name": "SERVICEBUS_CONNECTION_STRING",
+                        "connectionString": "[listKeys(resourceId(concat('Microsoft.ServiceBus/namespaces/AuthorizationRules'),parameters('serviceBus'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]",
+                        "type": 3
+                    }]
+                }

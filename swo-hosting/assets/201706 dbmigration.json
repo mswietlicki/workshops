@@ -1,0 +1,13 @@
+{
+    "Name": "SoftwareOne.ResourceManager.DbMigrations",
+    "Type": "",
+    "Location": "migrations",
+    "Collection": "_migrations",
+    "ConnectionString": "",
+    "ConnectionStringSource": {
+        "Type": "KeyVault",
+        "Vault": "nltkev0001",
+        "Uri": "https://nltkev0001.vault.azure.net",
+        "Key": "IntRMRApiPub-DocumentDbConnectionString"
+    }
+}

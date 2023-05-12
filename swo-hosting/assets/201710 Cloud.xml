@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/Pyra.Integration.ResourceManager" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <Parameters>
+    <Parameter Name="IntRMRApiPub_InstanceCount" Value="2" />
+    <Parameter Name="IntRMRApiInt_InstanceCount" Value="2" />
+    <Parameter Name="IntRMREventLoggerJob_InstanceCount" Value="2" />
+    <Parameter Name="IntRMRAzureResourceSynchronizerJob_InstanceCount" Value="2" />
+    <Parameter Name="IntRMRTagProjectionCalculatorJob_InstanceCount" Value="2" />
+    <Parameter Name="IntRMRSyncRepeaterJob_InstanceCount" Value="1" />
+    <Parameter Name="IntRMRResourceSynchronizerInitiatorWebJob_InstanceCount" Value="1" />
+    <Parameter Name="IntRMRTagProjectionInitiatorJob_InstanceCount" Value="1" />
+    <Parameter Name="PlacementConstraint_FrontEnd" Value="(isDMZ==true)" />
+  </Parameters>
+</Application>
