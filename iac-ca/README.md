@@ -16,9 +16,9 @@ Setup ContainerApps and Registry
 
     az containerapp env create -l westeurope -g workshop-ca-rg -n workshop-ca
     az acr create -g workshop-ca-rg -n workshopcaacr --sku Standard --admin-enabled
-    az acr credential show -g workshop-ca-rg -n workshopcaacr
-    $registry_login = ""
-    $registry_pass = ""
+    $acrCredentials = az acr credential show -g workshop-ca-rg -n workshopcaacr | ConvertFrom-Json
+    $registry_login = $acrCredentials.username
+    $registry_pass = $acrCredentials.passwords[0].value
 
 
 Building dotnet api
